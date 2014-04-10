@@ -126,7 +126,10 @@ void do_bootm_linux (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[],
 	setup_memory_tags (bd);
 #endif
 #ifdef CONFIG_CMDLINE_TAG
-	setup_commandline_tag (bd, commandline);
+	char *buf1 = malloc(1024);
+        sprintf(buf1, "%s mac=%s", getenv ("bootargs"), getenv ("ethaddr"));
+        setup_commandline_tag (bd, buf1);
+//	setup_commandline_tag (bd, commandline);
 #endif
 #ifdef CONFIG_INITRD_TAG
 	if (initrd_start && initrd_end)
