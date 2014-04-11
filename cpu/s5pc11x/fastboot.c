@@ -50,18 +50,18 @@ fastboot_ptentry ptable_default[] =
 	{
 		.name     = "system",
 		.start    = 0x700000,
-		.length   = 0xBA00000,//186M
+		.length   = 0xBF00000,//191M
 		.flags    = FASTBOOT_PTENTRY_FLAGS_WRITE_YAFFS
 	},
 	{
 		.name     = "cache",
-		.start    = 0xC100000,
+		.start    = 0xC600000,
 		.length   = 0x2E00000,//46M
 		.flags    = FASTBOOT_PTENTRY_FLAGS_WRITE_YAFFS
 	},
 	{
 		.name     = "userdata",
-		.start    = 0xEF00000,
+		.start    = 0xF400000,
 		.length   = 0,
 		.flags    = FASTBOOT_PTENTRY_FLAGS_WRITE_YAFFS
 	}
