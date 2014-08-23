@@ -1,0 +1,7 @@
+/.depend
+u-boot*
+System.map
+include/autoconf.*
+*.bin
+*.srec
+*.o

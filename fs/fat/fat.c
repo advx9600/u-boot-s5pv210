@@ -53,6 +53,7 @@ downcase(char *str)
 
 static  block_dev_desc_t *cur_dev = NULL;
 static unsigned long part_offset = 0;
+static unsigned long part_size = 0;
 static int cur_part = 1;
 
 #define BYTE_PER_SEC	512
@@ -102,6 +103,7 @@ fat_register_device(block_dev_desc_t *dev_desc, int part_no)
 	if (!get_partition_info (dev_desc, part_no, &info)) {
 		part_offset = info.start;
 		cur_part = part_no;
+		part_size = info.size;
 	} else if (!strncmp((char *)&buffer[DOS_FS_TYPE_OFFSET], "FAT", 3)) {
 		/* ok, we assume we are on a PBR only */
 		cur_part = 1;

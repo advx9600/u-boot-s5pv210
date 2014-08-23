@@ -108,6 +108,7 @@
 #endif
 
 #define TOLOWER(c)	if((c) >= 'A' && (c) <= 'Z'){(c)+=('a' - 'A');}
+#define TOUPPER(c)	if((c) >= 'a' && (c) <= 'z'){(c)-=('a' - 'A');}
 #define START(dent)	(FAT2CPU16((dent)->start) \
 			+ (mydata->fatsize != 32 ? 0 : \
 			  (FAT2CPU16((dent)->starthi) << 16)))
@@ -314,4 +315,5 @@ const char *file_getfsname(int idx);
 int fat_register_device(block_dev_desc_t *dev_desc, int part_no);
 int fat_format_device(block_dev_desc_t *dev_desc, int part_no);
 
+int file_fat_write(const char *filename, void *buffer, unsigned long maxsize);
 #endif /* _FAT_H_ */
