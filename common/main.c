@@ -208,6 +208,23 @@ static __inline__ int abortboot(int bootdelay)
 static int menukey = 0;
 #endif
 
+static int ExecuteCmd(char *cmd);
+
+static int isExistImg(char* img)
+{
+	char cmd[30];
+	sprintf(cmd,"sdfuse check %s.xml",img);
+	if (!ExecuteCmd(cmd)){
+	  if (strncmp(img,"u-boot",6)){
+		sprintf(cmd,"sdfuse check %s.img",img);
+	  }else{
+		sprintf(cmd,"sdfuse check %s.bin",img);
+	  }
+	  return !ExecuteCmd(cmd);
+	}
+	return 0;
+}
+
 static __inline__ int abortboot(int bootdelay)
 {
 	int abort = 0;
@@ -261,14 +278,62 @@ static __inline__ int abortboot(int bootdelay)
 		gd->flags &= ~GD_FLG_SILENT;
 #endif
 
+#if 1
+if (!abort && bootdelay == 0 ){
+	#define  ITEM_ERASE_ALL_NAND "isEraseAllNand"
+	char* strerase = getenv(ITEM_ERASE_ALL_NAND);
+
+	// nand erase
+	if (!ExecuteCmd("sdfuse check nand_erase.xml")){
+		if (strncmp(strerase,"true",4)){
+		  if (isExistImg("u-boot")){
+			ExecuteCmd("nand erase");
+			ExecuteCmd("sdfuse flash bootloader u-boot.bin");
+			setenv(ITEM_ERASE_ALL_NAND,"true");
+			saveenv();
+			ExecuteCmd("reset");
+		  }
+		}
+	}else{
+		if (strncmp(strerase,"false",5)){
+		  setenv(ITEM_ERASE_ALL_NAND,"false");
+		  saveenv();
+		}
+	}
+
+
+	// u-boot
+	if (ExecuteCmd("sdfuse check nand_erase.xml") && 
+		isExistImg("u-boot")){
+		ExecuteCmd("sdfuse flash bootloader u-boot.bin");
+	}
+	// kernel 
+	if (isExistImg("kernel")){
+		ExecuteCmd("sdfuse flash kernel kernel.img");
+	}
+	// ramdisk
+	if (isExistImg("ramdisk-yaffs")){
+		ExecuteCmd("sdfuse flash ramdisk ramdisk-yaffs.img");
+	}
+	// userdata
+	if (isExistImg("userdata")){
+		ExecuteCmd("sdfuse flash userdata userdata.img");
+	}
+	// system
+	if (isExistImg("system")){
+		ExecuteCmd("sdfuse flash system system.img");
+	}
+} // abort and time=0
+#endif
+
 	return abort;
 }
 # endif	/* CONFIG_AUTOBOOT_KEYED */
 #endif	/* CONFIG_BOOTDELAY >= 0  */
 
-static void ExecuteCmd(char *cmd)
+static int ExecuteCmd(char *cmd)
 {
-	parse_string_outer(cmd, FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP);
+	return parse_string_outer(cmd, FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP);
 }
 
 

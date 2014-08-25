@@ -1631,6 +1631,7 @@ U_BOOT_CMD(
 #include <part.h>
 #include <fat.h>
 #define CFG_FASTBOOT_SDFUSE_DIR		"/sdfuse"
+#define CFG_FASTBOOT_SDFUSE_CHECK_DIR   "/sdfuse"
 #ifdef CFG_FASTBOOT_SDMMCBSP
 #define CFG_FASTBOOT_SDFUSE_MMCDEV	1
 #else
@@ -1641,6 +1642,64 @@ U_BOOT_CMD(
  * part : partition name (This should be a defined name at ptable)
  * file : file to read
  */
+
+static int mk_sd_partition()
+{
+	block_dev_desc_t *dev_desc=NULL;
+
+	dev_desc = get_dev("mmc", CFG_FASTBOOT_SDFUSE_MMCDEV);
+	if (dev_desc == NULL) {
+		printf ("** Invalid boot device **\n");
+		return 1;
+	}
+	if (fat_register_device(dev_desc, CFG_FASTBOOT_SDFUSE_MMCPART) != 0) {
+		printf ("** Invalid partition **\n");
+		return 1;
+	}
+}
+
+static int check_from_sd (char *file)
+{
+	if (file == NULL){
+		return 1;
+	}
+
+	if (mk_sd_partition()){
+		return 1;
+	}
+
+	long size;
+	unsigned long offset;
+	unsigned long count;
+	char filename[100];
+
+	sprintf(filename, "%s/%s", CFG_FASTBOOT_SDFUSE_CHECK_DIR, file);
+	offset = CFG_FASTBOOT_TRANSFER_BUFFER;
+	count = 0;
+	size = file_fat_read (filename, (unsigned char *) offset, count);
+
+	if (size == -1) {
+		printf("Failed to read %s\n", filename);
+		return 1;
+	}else{
+		return 0;
+	}
+
+	return 1;
+}
+
+static int write_to_sd(char* filename,char* buf,int count)
+{
+	if (mk_sd_partition()){
+		return 1;
+	}
+	unsigned long offset;
+	offset = CFG_FASTBOOT_TRANSFER_BUFFER;
+	int ret =file_fat_write (filename, (unsigned char *) offset, count);
+	printf("file_fat_write:%d\n",ret);
+	return 0;
+}
+
 static int update_from_sd (char *part, char *file)
 {
 	int ret = 1;
@@ -1798,6 +1857,14 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			goto err_sdfuse;
 
 		ret = 0;
+	}
+	else if ((argc == 3) && !strcmp(argv[1], "check"))
+	{
+		return check_from_sd(argv[2]);
+	}
+	else if ((argc == 4) && !strcmp(argv[1], "write"))
+	{
+		return write_to_sd(argv[2],argv[3],strlen(argv[3]));
 	}
 	else
 	{
