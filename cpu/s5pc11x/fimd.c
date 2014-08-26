@@ -323,7 +323,7 @@ void LCD_Initialize_TL2796(void)
  */
 
 #define LCD_WIDTH		1366
-#define LCD_HEIGHT		500	//766
+#define LCD_HEIGHT		600	//766
 
 void LCD_Initialize_NONAME1(void)
 {
