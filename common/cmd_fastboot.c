@@ -1644,19 +1644,30 @@ U_BOOT_CMD(
  * file : file to read
  */
 
+static int gHadMkSdPartition=0;
+
 static int mk_sd_partition()
 {
+	if (gHadMkSdPartition<0){ 
+		printf("mk_sd_partition failed,please insert SD card\n");
+		return -1;
+	}
+	if (gHadMkSdPartition>0) return 0;
+	
 	block_dev_desc_t *dev_desc=NULL;
 
 	dev_desc = get_dev("mmc", CFG_FASTBOOT_SDFUSE_MMCDEV);
 	if (dev_desc == NULL) {
 		printf ("** Invalid boot device **\n");
+		gHadMkSdPartition=-1;
 		return 1;
 	}
 	if (fat_register_device(dev_desc, CFG_FASTBOOT_SDFUSE_MMCPART) != 0) {
 		printf ("** Invalid partition **\n");
+		gHadMkSdPartition=-1;
 		return 1;
 	}
+	gHadMkSdPartition=1;
 	return 0;
 }
 
