@@ -336,6 +336,7 @@ static struct nand_ecclayout autoplace_oobinfo = {
  * This code is ported from nandwrite.c from Linux mtd utils by
  * Steven J. Hill and Thomas Gleixner.
  */
+void LCD_writeSinglePercent(int per);
 int nand_write_opts(nand_info_t *meminfo, const nand_write_options_t *opts)
 {
 	int imglen = 0;
@@ -572,6 +573,7 @@ int nand_write_opts(nand_info_t *meminfo, const nand_write_options_t *opts)
 				       "-- %3d%% complete.",
 				       mtdoffset, percent);
 				percent_complete = percent;
+				LCD_writeSinglePercent(percent);
 			}
 		}
 

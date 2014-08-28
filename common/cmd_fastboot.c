@@ -814,8 +814,8 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 #else
 			printf("erasing '%s'\n", ptn->name);
 #endif
-			LCD_setfgcolor(0x7FFFD4);
-			LCD_setprogress(100);
+			//LCD_setfgcolor(0x7FFFD4);
+			//LCD_setprogress(100);
 
 #if defined(CFG_FASTBOOT_SDMMCBSP)
 			// Temporary (but, simplest) implementation
@@ -1014,8 +1014,8 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 
 			struct fastboot_ptentry *ptn;
 
-			LCD_setfgcolor(0x8B4500);
-			LCD_setprogress(100);
+			//LCD_setfgcolor(0x8B4500);
+			//LCD_setprogress(100);
 
 			/* Special case: boot.img */
 			if (!strcmp("boot", cmdbuf + 6))
@@ -1111,6 +1111,7 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 					else
 					{
 						printf("partition '%s' flashed\n", ptn->name);
+						LCD_writeSinglePercent(100);
 						sprintf(response, "OKAY");
 					}
 				}
@@ -1139,7 +1140,7 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 send_tx_status:
 		fastboot_tx_status(response, strlen(response), FASTBOOT_TX_ASYNC);
 
-		LCD_setprogress(0);
+		//LCD_setprogress(0);
 	} /* End of command */
 
 	return ret;
@@ -1381,7 +1382,7 @@ static int set_partition_table()
 	fastboot_flash_dump_ptn();
 #endif
 
-	LCD_setleftcolor(0x1024C0);
+	//LCD_setleftcolor(0x1024C0);
 
 	return 0;
 }
@@ -1483,7 +1484,7 @@ static int set_partition_table()
 	fastboot_flash_dump_ptn();
 #endif
 
-	LCD_setleftcolor(0x8a2be2);
+	//LCD_setleftcolor(0x8a2be2);
 
 	return 0;
 
@@ -1547,7 +1548,7 @@ int do_fastboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			timeout_endtime = get_ticks();
 			timeout_endtime += timeout_ticks;
 
-			LCD_turnon();
+			//LCD_turnon();
 
 			while (1)
 			{
@@ -1605,9 +1606,9 @@ int do_fastboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		/* Reset the board specific support */
 		fastboot_shutdown();
 
-		LCD_setfgcolor(0x000010);
-		LCD_setleftcolor(0x000010);
-		LCD_setprogress(100);
+		//LCD_setfgcolor(0x000010);
+		//LCD_setleftcolor(0x000010);
+		//LCD_setprogress(100);
 
 		/* restart the loop if a disconnect was detected */
 	} while (continue_from_disconnect);
@@ -1656,6 +1657,7 @@ static int mk_sd_partition()
 		printf ("** Invalid partition **\n");
 		return 1;
 	}
+	return 0;
 }
 
 static int check_from_sd (char *file)
@@ -1714,8 +1716,8 @@ static int update_from_sd (char *part, char *file)
 		block_dev_desc_t *dev_desc=NULL;
 
 		printf("Partition: %s, File: %s/%s\n", part, CFG_FASTBOOT_SDFUSE_DIR, file);
-		LCD_setfgcolor(0x2E8B57);
-		LCD_setprogress(100);
+		//LCD_setfgcolor(0x2E8B57);
+		//LCD_setprogress(100);
 		dev_desc = get_dev("mmc", CFG_FASTBOOT_SDFUSE_MMCDEV);
 		if (dev_desc == NULL) {
 			printf ("** Invalid boot device **\n");
@@ -1812,7 +1814,7 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 	else if ((argc == 2) && !strcmp(argv[1], "flashall"))
 	{
-		LCD_turnon();
+		//LCD_turnon();
 /*
 		if (update_from_sd("boot", "boot.img"))
 			goto err_sdfuse;
@@ -1842,7 +1844,7 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 	else if ((argc == 4) && !strcmp(argv[1], "flash"))
 	{
-		LCD_turnon();
+		//LCD_turnon();
 
 		if (update_from_sd(argv[2], argv[3]))
 			goto err_sdfuse;
@@ -1851,7 +1853,7 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 	else if ((argc == 3) && !strcmp(argv[1], "erase"))
 	{
-		LCD_turnon();
+		//LCD_turnon();
 
 		if (update_from_sd(argv[2], NULL))
 			goto err_sdfuse;
@@ -1875,9 +1877,9 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 
 err_sdfuse:
-	LCD_setfgcolor(0x000010);
-	LCD_setleftcolor(0x000010);
-	LCD_setprogress(100);
+	//LCD_setfgcolor(0x000010);
+	//LCD_setleftcolor(0x000010);
+	//LCD_setprogress(100);
 
 	if (enable_reset)
 		do_reset (NULL, 0, 0, NULL);

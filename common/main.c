@@ -215,12 +215,15 @@ static int isExistImg(char* img)
 	char cmd[30];
 	sprintf(cmd,"sdfuse check %s.xml",img);
 	if (!ExecuteCmd(cmd)){
+	#if 0
 	  if (strncmp(img,"u-boot",6)){
 		sprintf(cmd,"sdfuse check %s.img",img);
 	  }else{
 		sprintf(cmd,"sdfuse check %s.bin",img);
 	  }
 	  return !ExecuteCmd(cmd);
+	#endif
+	  return 1;
 	}
 	return 0;
 }
@@ -280,9 +283,13 @@ static __inline__ int abortboot(int bootdelay)
 
 #if 1
 if (!abort && bootdelay == 0 ){
+do{
 	#define  ITEM_ERASE_ALL_NAND "isEraseAllNand"
 	char* strerase = getenv(ITEM_ERASE_ALL_NAND);
 
+	if (!ExecuteCmd("sdfuse check no_flash.xml")){
+		break;
+	}
 	// nand erase
 	if (!ExecuteCmd("sdfuse check nand_erase.xml")){
 		if (strncmp(strerase,"true",4)){
@@ -301,28 +308,38 @@ if (!abort && bootdelay == 0 ){
 		}
 	}
 
-
 	// u-boot
 	if (ExecuteCmd("sdfuse check nand_erase.xml") && 
 		isExistImg("u-boot")){
+		LCD_turnon_once();
+		LCD_writeSingleComment("u-boot");
 		ExecuteCmd("sdfuse flash bootloader u-boot.bin");
 	}
 	// kernel 
 	if (isExistImg("kernel")){
+		LCD_turnon_once();
+		LCD_writeSingleComment("kernel");
 		ExecuteCmd("sdfuse flash kernel kernel.img");
 	}
 	// ramdisk
 	if (isExistImg("ramdisk-yaffs")){
+		LCD_turnon_once();
+		LCD_writeSingleComment("ramdisk");
 		ExecuteCmd("sdfuse flash ramdisk ramdisk-yaffs.img");
 	}
 	// userdata
 	if (isExistImg("userdata")){
+		LCD_turnon_once();
+		LCD_writeSingleComment("userdata");
 		ExecuteCmd("sdfuse flash userdata userdata.img");
 	}
 	// system
 	if (isExistImg("system")){
+		LCD_turnon_once();
+		LCD_writeSingleComment("system");
 		ExecuteCmd("sdfuse flash system system.img");
 	}
+}while(0);
 } // abort and time=0
 #endif
 

@@ -12,11 +12,14 @@
 #include <common.h>
 #include <asm/io.h>
 #include <asm/types.h>
+#include <fonts.h>
 
 #define LCD_BGCOLOR		0x1428A0
 
 static unsigned int gFgColor = 0xFF;
 static unsigned int gLeftColor = LCD_BGCOLOR;
+
+#define LCD_SETCURSOR(Xpos,Ypos) (CFG_LCD_FBUFFER + Xpos*LCD_WIDTH*4 + Ypos*4)
 
 #define Inp32(_addr)		readl(_addr)
 #define Outp32(addr, data)	(*(volatile u32 *)(addr) = (data))
@@ -468,6 +471,16 @@ void LCD_turnon(void)
 #endif
 }
 
+static int gIsLCDTurnOn = 0;
+
+void LCD_turnon_once()
+{
+	if (!gIsLCDTurnOn){
+	  gIsLCDTurnOn=1;
+	  LCD_turnon();
+	}
+}
+
 void LCD_setfgcolor(unsigned int color)
 {
 	gFgColor = color;
@@ -504,4 +517,77 @@ void LCD_setprogress(int percentage)
 		}
 	}
 #endif
+}
+
+#define u16 unsigned short
+#define uc16 unsigned short
+
+static void LCD_clear()
+{
+  u16 i, j;
+  u32* pBuffer = (u32*)CFG_LCD_FBUFFER;
+  for (i=0; i < LCD_HEIGHT; i++)
+  {
+	for (j=0; j < LCD_WIDTH; j++)
+	{
+		*pBuffer++ = LCD_BGCOLOR;
+	}
+  }
+}
+static void LCD_DrawChar(u16 Xpos, u16 Ypos, uc16 *c)
+{
+  u32 index = 0, i = 0;
+  u16 Xaddress = 0;
+   Xaddress = Xpos;
+    u32* pBuffer = (u32*)LCD_SETCURSOR(Xaddress, Ypos);
+  for(index = 0; index < 24; index++)
+  {
+    for(i = 0; i < 16; i++)
+    {
+      if((c[index] & (1 << i)) == 0x00)
+      {
+        *pBuffer++ = 0;//BackColor;
+      }
+      else
+      {
+        *pBuffer++ = 0xFFFFFF;//TextColor;
+      }
+    }
+    Xaddress++;
+    pBuffer = (u32*)LCD_SETCURSOR(Xaddress, Ypos);
+  }
+}
+
+static void LCD_DisplayChar(u16 Line, u16 Column, u8 Ascii)
+{
+  Ascii -= 32;
+  LCD_DrawChar(Line, Column, &ASCII_Table[Ascii * 24]);
+}
+
+static void LCD_DisplayStr(u16 Line, u16 Column, char* str)
+{
+  int i=0;
+  for (i=0;i<strlen(str);i++)
+  {
+	LCD_DisplayChar(Line, Column+16*i,str[i]);
+  }
+}
+
+static int gCommentLen=0;
+static int gCommentNum=0;
+
+void LCD_writeSinglePercent(int per)
+{
+	char buf[5];
+	sprintf(buf,"%3d",per);
+	LCD_DisplayStr(100+(gCommentNum-1)*25,100+gCommentLen*16,buf);
+}
+
+void LCD_writeSingleComment(const char* str)
+{
+	char buf[20];
+	sprintf(buf,"%s:",str);
+	gCommentLen=strlen(buf);
+	LCD_DisplayStr(100+gCommentNum*25,100,buf);
+	gCommentNum++;
 }
