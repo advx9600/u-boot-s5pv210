@@ -127,6 +127,11 @@ ifeq ($(ARCH),powerpc)
 ARCH = ppc
 endif
 
+ifneq ($(obj)my_version_update,$(wildcard $(obj)my_version_update))
+main:
+	echo "my_version_update not exist"
+endif
+
 ifeq ($(obj)include/config.mk,$(wildcard $(obj)include/config.mk))
 
 # load ARCH, BOARD, and CPU configuration
@@ -283,13 +288,15 @@ __LIBS := $(subst $(obj),,$(LIBS)) $(subst $(obj),,$(LIBBOARD))
 #########################################################################
 #########################################################################
 
-ALL += $(obj)u-boot.srec $(obj)u-boot.bin $(obj)System.map $(U_BOOT_NAND) $(U_BOOT_ONENAND) $(obj)u-boot.dis
+ALL += $(obj)my_update $(obj)u-boot.srec $(obj)u-boot.bin $(obj)System.map $(U_BOOT_NAND) $(U_BOOT_ONENAND) $(obj)u-boot.dis
 ifeq ($(ARCH),blackfin)
 ALL += $(obj)u-boot.ldr
 endif
 
 all:		$(ALL)
 
+$(obj)my_update:
+	./my_version_update my_version.txt ./include/configs/smdkv210single.h
 $(obj)u-boot.hex:	$(obj)u-boot
 		$(OBJCOPY) ${OBJCFLAGS} -O ihex $< $@
 
@@ -3176,4 +3183,6 @@ backup:
 	F=`basename $(TOPDIR)` ; cd .. ; \
 	gtar --force-local -zcvf `date "+$$F-%Y-%m-%d-%T.tar.gz"` $$F
 
+myupdate:
+	gcc my_version_update.c -o my_version_update
 #########################################################################

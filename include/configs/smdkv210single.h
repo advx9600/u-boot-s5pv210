@@ -210,7 +210,7 @@
 #define CONFIG_BOOTP_BOOTPATH
 
 //#define CONFIG_BOOTARGS    	"console=ttySAC2,115200 init=/init"
-#define CONFIG_BOOTARGS    	"noinitrd root=/dev/mtdblock2 console=ttySAC2 init=/init skipCalibrate radio=none" 
+#define CONFIG_BOOTARGS    	"noinitrd root=/dev/mtdblock2 console=ttySAC2 init=/init skipCalibrate radio=none my_version=1.0.00" 
 #define CONFIG_ETHADDR		00:40:5c:26:0a:5b
 #define CONFIG_NETMASK          255.255.255.0
 #define CONFIG_IPADDR		192.168.0.20
