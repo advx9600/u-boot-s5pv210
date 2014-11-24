@@ -291,7 +291,7 @@ endif
 all:		$(ALL)
 
 $(obj)my_update:
-	./my_bin/version_update 1.0.00 0
+	./my_bin/version_update smdkv210 1.0.00 uboot  include/configs/smdkv210single.sample.h include/configs/smdkv210single.h
 $(obj)u-boot.hex:	$(obj)u-boot
 		$(OBJCOPY) ${OBJCFLAGS} -O ihex $< $@
 
@@ -3177,5 +3177,8 @@ endif
 backup:
 	F=`basename $(TOPDIR)` ; cd .. ; \
 	gtar --force-local -zcvf `date "+$$F-%Y-%m-%d-%T.tar.gz"` $$F
+
+compress:
+	python my_bin/zip_img.py smdkv210 uboot
 
 #########################################################################

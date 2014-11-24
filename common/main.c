@@ -41,6 +41,7 @@
 #include <fastboot.h>
 #include <post.h>
 
+
 #if defined(CONFIG_SILENT_CONSOLE) || defined(CONFIG_POST) || defined(CONFIG_CMDLINE_EDITING)
 DECLARE_GLOBAL_DATA_PTR;
 #endif
@@ -286,6 +287,7 @@ if (!abort && bootdelay == 0 ){
 do{
 	#define  ITEM_ERASE_ALL_NAND "isEraseAllNand"
 	char* strerase = getenv(ITEM_ERASE_ALL_NAND);
+	int isflashed=0;
 
 	if (!ExecuteCmd("sdfuse check no_flash.xml")){
 		break;
@@ -294,6 +296,7 @@ do{
 	if (!ExecuteCmd("sdfuse check nand_erase.xml")){
 		if (strncmp(strerase,"true",4)){
 		  if (isExistImg("u-boot")){
+			isflashed=1;
 			ExecuteCmd("nand erase");
 			ExecuteCmd("sdfuse flash bootloader u-boot.bin");
 			setenv(ITEM_ERASE_ALL_NAND,"true");
@@ -311,33 +314,42 @@ do{
 	// u-boot
 	if (ExecuteCmd("sdfuse check nand_erase.xml") && 
 		isExistImg("u-boot")){
+		isflashed=1;
 		LCD_turnon_once();
 		LCD_writeSingleComment("u-boot");
 		ExecuteCmd("sdfuse flash bootloader u-boot.bin");
 	}
 	// kernel 
 	if (isExistImg("kernel")){
+		isflashed=1;
 		LCD_turnon_once();
 		LCD_writeSingleComment("kernel");
 		ExecuteCmd("sdfuse flash kernel kernel.img");
 	}
 	// ramdisk
 	if (isExistImg("ramdisk-yaffs")){
+		isflashed=1;
 		LCD_turnon_once();
 		LCD_writeSingleComment("ramdisk");
 		ExecuteCmd("sdfuse flash ramdisk ramdisk-yaffs.img");
 	}
 	// userdata
 	if (isExistImg("userdata")){
+		isflashed=1;
 		LCD_turnon_once();
 		LCD_writeSingleComment("userdata");
 		ExecuteCmd("sdfuse flash userdata userdata.img");
 	}
 	// system
 	if (isExistImg("system")){
+		isflashed=1;
 		LCD_turnon_once();
 		LCD_writeSingleComment("system");
 		ExecuteCmd("sdfuse flash system system.img");
+	}
+
+	if (isflashed){
+		LCD_to_origin();
 	}
 }while(0);
 } // abort and time=0
